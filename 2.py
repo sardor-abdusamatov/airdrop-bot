@@ -1,36 +1,57 @@
-######################## LIBRARIES ########################
-import os
+##################LIBRARIES ######################
 import asyncio
 import logging
-
-import random
+import os
 from dotenv import load_dotenv
+
+##############libs for bot ##################
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message
-from aiogram.types import FSInputFile
-################ BOT TOKEN#######################
+from aiogram.types import CallbackQuery, Message
+
+############### new imports ###############
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+# ------------------Настройка бота--------------------------
 load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
-#################### BOT SETTINGS ########################
-bot = Bot(token=TOKEN)
+MY_TOKEN = os.getenv("BOT_TOKEN")
+
+bot = Bot(token=MY_TOKEN)
 dp = Dispatcher()
 logging.basicConfig(level=logging.INFO)
-####################  HANDLERS  ############################
+
+
 @dp.message(Command("start"))
 async def start(message: Message):
-    await message.answer(f"HI {message.from_user.full_name}, ENTER NAME")
+  kb = InlineKeyboardBuilder()
+  kb.button(text="Red", callback_data="rred")
+  kb.button(text="Green", callback_data="gran")
+  kb.button(text="Blue", callback_data="ble")
+  kb.adjust(2)
+  await message.answer(
+      "Click to see the color ",
+      reply_markup=kb.as_markup(),
+  )
+
+@dp.callback_query(F.data == "rred")
+async def ruchka(callback: CallbackQuery):
+  await callback.message.answer("🔴Red")
+  await callback.answer()
 
 
-@dp.message(F.text)
-async def any_action(message: Message):
-    request_message = message.text.upper()
-    await message.answer(f"UPPER CASE : {request_message}")
+@dp.callback_query(F.data == "gran")
+async def granit(callback: CallbackQuery):
+  await callback.message.answer("🟢Green")
+  await callback.answer()
 
 
-##################### START BOT #################
+@dp.callback_query(F.data == "ble")
+async def hblue(callback: CallbackQuery):
+  await callback.message.answer("🔵Blue")
+  await callback.answer()
 
 async def main():
     await dp.start_polling(bot)
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(main())

@@ -1,46 +1,59 @@
-######################## LIBRARIES ########################
+##################LIBRARIES ######################
 import os
 import asyncio
 import logging
-
 import random
 from dotenv import load_dotenv
+##############libs for bot ##################
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message
-from aiogram.types import FSInputFile
-################ BOT TOKEN#######################
+from aiogram.types import Message, CallbackQuery
+############### new imports ###############
+from aiogram.utils.keyboard import (ReplyKeyboardBuilder, 
+                                    InlineKeyboardBuilder)
+
+# ------------------Настройка бота--------------------------
 load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
-#################### BOT SETTINGS ########################
-bot = Bot(token=TOKEN)
+MY_TOKEN = os.getenv("BOT_TOKEN")
+
+bot = Bot(token=MY_TOKEN)
 dp = Dispatcher()
 logging.basicConfig(level=logging.INFO)
-####################  HANDLERS  ############################
+# ------------------Хэндлеры--------------------------
 @dp.message(Command("start"))
 async def start(message: Message):
-    await message.answer(f"HI , ENTER NAME")
+    kb = ReplyKeyboardBuilder()
+    kb.button(text="Start")
+    kb.button(text="Done")
+    await message.answer("Чтобы пользоваться ботом, подпишитесь на наш канал.", reply_markup=kb.as_markup(
+                                                resize_keyboard=True
+    ))
 
-@dp.message(Command("luck"))
-async def start(message: Message):
+@dp.message(F.text == "Start")
+async def start_command(message:Message):
+    await message.answer(f"Hello {message.from_user.full_name}!")
 
-    luk = random.randint(1,12)
-    if luk == 3 or luk == 9 or luk == 12:
-        await message.answer(f"You're lucky ")
+@dp.message(Command("Subscribe"))
+async def Subscribe(message: Message):
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Subscribe", callback_data="Subscibe")
+    await  message.answer("Checking", reply_markup=kb.as_markup())
+@dp.message(F.text == "Done")
+async def start_command(message:Message):
+    a = random.randint(1, 10)
+    b = random.randint(1, 10)
+    c = a + b
+    await message.answer(f"🟢 Subscription verified!")
+    await message.answer(f"🔐 Чтобы продолжить, решите пример: {a} + {b} = ? Напишите ответ числом в чат.")
+@dp.message(F.text == str(c))
+async def verified(message: Message):
+    await  message.answer(" Готово, можно пользоваться ботом.Добро пожаловать, 𝕊𝔸ℝ𝔻𝕆ℝ! \n Ваш бесплатный VPN уже готов.\n Подключение займет около минуты.  \n Выберите устройство и получите доступ.")
+# --------------------------------------------
 
-# @dp.message(F.text)
-# async def any_action(message: Message):
-#     request_message = message.text
-#     await message.answer(f"Your name: {request_message}")
 
-##################### START BOT #################
-
+# ------------------Запуск бота--------------------------
 async def main():
     await dp.start_polling(bot)
+
 if __name__ == '__main__':
     asyncio.run(main())
-
-
-
-
-
